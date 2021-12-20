@@ -1,12 +1,26 @@
 import java.util.List;
 
+/**
+ * This class represents a state in the game.
+ *
+ * @author emsquellen
+ */
 public class State {
     private final Board board;
-    private int player;
-    private int opponent;
-    private int x;
-    private int y;
+    private final int player;
+    private final int opponent;
+    private final int x;
+    private final int y;
 
+    /**
+     * Constructor for a state.
+     *
+     * @param board    the board
+     * @param player   the player
+     * @param opponent the opponent
+     * @param x        the x coordinate
+     * @param y        the y coordinate
+     */
     public State(Board board, int player, int x, int y) {
         this.board = board;
         this.player = player;
@@ -15,53 +29,51 @@ public class State {
         this.y = y;
     }
 
+    /**
+     * Getter for the board.
+     */
     public Board getBoard() {
         return board;
     }
 
+    /**
+     * Getter for the player.
+     */
     public int getPlayer() {
         return player;
     }
 
-    public void setPlayer(int player) {
-        this.player = player;
-        this.opponent = player == 1 ? 2 : 1;
-    }
-
+    /**
+     * Getter for the opponent.
+     */
     public int getOpponent() {
         return opponent;
     }
 
-    public void setOpponent(int opponent) {
-        this.opponent = opponent;
-        this.player = opponent == 1 ? 2 : 1;
-    }
-
+    /**
+     * Getter for the x coordinate.
+     */
     public int getX() {
         return x;
     }
 
-    public void setX(int x) {
-        this.x = x;
-    }
-
+    /**
+     * Getter for the y coordinate.
+     */
     public int getY() {
         return y;
     }
 
-    public void setY(int y) {
-        this.y = y;
-    }
-
+    /**
+     * Getter for the move (x, y).
+     */
     public int[] getMove() {
         return new int[] { x, y };
     }
 
-    public void setMove(int[] move) {
-        this.x = move[0];
-        this.y = move[1];
-    }
-
+    /**
+     * Equals method.
+     */
     @Override
     public boolean equals(Object obj) {
         return obj instanceof State
@@ -71,6 +83,9 @@ public class State {
                 && ((State) obj).y == this.y;
     }
 
+    /**
+     * String representation of the state.
+     */
     @Override
     public String toString() {
         return new StringBuilder()
@@ -84,6 +99,9 @@ public class State {
                 .toString();
     }
 
+    /**
+     * Getter for the list of possible moves.
+     */
     public List<int[]> getMoves() {
         return this.board.getAllMoves(this.player);
     }

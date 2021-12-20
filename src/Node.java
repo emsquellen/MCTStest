@@ -1,9 +1,14 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.Arrays;
 
+/**
+ * Represents a Node in the game tree for monte carlo tree search.
+ *
+ * @author emsquellen
+ */
 public class Node {
     private final Node parent;
     private final State state;
@@ -13,6 +18,9 @@ public class Node {
     private int wins;
     private int losses;
 
+    /**
+     * Enum for the possible ending of a node
+     */
     enum Outcome {
         WIN,
         DRAW,
@@ -20,6 +28,12 @@ public class Node {
         ERROR
     }
 
+    /**
+     * Constructor for a node.
+     *
+     * @param parent the parent node
+     * @param state  the state of the node
+     */
     public Node(Node parent, State state) {
         this.parent = parent;
         this.state = state;
@@ -30,6 +44,14 @@ public class Node {
         this.losses = 0;
     }
 
+    /**
+     * Constructor for a node.
+     *
+     * @param board  the board of the node
+     * @param player the player of the node
+     * @param x      the x coordinate of move made last
+     * @param y      the y coordinate of move made last
+     */
     public Node(Node parent, Board board, int player, int x, int y) {
         State state = new State(board, player, x, y);
         this.parent = parent;
@@ -41,6 +63,11 @@ public class Node {
         this.losses = 0;
     }
 
+    /**
+     * Clone constructor for a node.
+     *
+     * @param node the node to clone
+     */
     public Node(Node node) {
         this.parent = node.parent;
         this.state = node.state;
@@ -51,36 +78,78 @@ public class Node {
         this.losses = node.losses;
     }
 
+    /**
+     * Getter for the parent node.
+     * 
+     * @return Node
+     */
     public Node getParent() {
         return parent;
     }
 
+    /**
+     * Getter for the state of the node.
+     * 
+     * @return State
+     */
     public State getState() {
         return state;
     }
 
+    /**
+     * Getter for the terminal status of the node.
+     * 
+     * @return boolean
+     */
     public boolean isTerminal() {
         return this.isTerminal;
     }
 
+    /**
+     * Setter for the terminal status of the node.
+     * 
+     * @param isTerminal
+     */
     public void setTerminal(boolean isTerminal) {
         this.isTerminal = isTerminal;
     }
 
+    /**
+     * Getter for the children of the node.
+     * 
+     * @return List<Node>
+     */
     public List<Node> getChildren() {
         return this.children;
     }
 
+    /**
+     * Setter for the children of the node.
+     * 
+     * @param children
+     */
     public void setChildren(List<Node> children) {
         this.children = children;
     }
 
+    /**
+     * Adds a child to the node.
+     * 
+     * @param child
+     * @return boolean
+     */
     public boolean addChild(Node child) {
         this.children.add(child);
         this.isTerminal = false;
         return true;
     }
 
+    /**
+     * Removes a child from the node.
+     * 
+     * @param child
+     * @return boolean
+     */
     public boolean removeChild(Node child) {
         this.children.remove(child);
         if (this.children.size() == 0) {
@@ -89,88 +158,179 @@ public class Node {
         return true;
     }
 
+    /**
+     * Amount of children of the node.
+     * 
+     * @return int
+     */
     public int getNumChildren() {
         return this.children.size();
     }
 
+    /**
+     * Getter for the visits of the node.
+     * 
+     * @return int
+     */
     public int getVisits() {
         return this.visits;
     }
 
+    /**
+     * Setter for the visits of the node.
+     * 
+     * @param visits
+     */
     public void setVisits(int visits) {
         this.visits = visits;
     }
 
+    /**
+     * Increments the visits of the node.
+     */
     public void incrementVisits() {
         this.visits++;
     }
 
+    /**
+     * Decrements the visits of the node.
+     */
     public void decrementVisits() {
         this.visits--;
     }
 
+    /**
+     * Getter for the wins of the node.
+     * 
+     * @return int
+     */
     public int getWins() {
         return this.wins;
     }
 
+    /**
+     * Setter for the wins of the node.
+     * 
+     * @param wins
+     */
     public void setWins(int wins) {
         this.wins = wins;
     }
 
+    /**
+     * Increments the wins of the node.
+     */
     public void incrementWins() {
         this.wins++;
     }
 
+    /**
+     * Decrements the wins of the node.
+     */
     public void decrementWins() {
         this.wins--;
     }
 
+    /**
+     * Getter for the losses of the node.
+     * 
+     * @return int
+     */
     public int getLosses() {
         return this.losses;
     }
 
+    /**
+     * Setter for the losses of the node.
+     * 
+     * @param losses
+     */
     public void setLosses(int losses) {
         this.losses = losses;
     }
 
+    /**
+     * Increments the losses of the node.
+     */
     public void incrementLosses() {
         this.losses++;
     }
 
+    /**
+     * Decrements the losses of the node.
+     */
     public void decrementLosses() {
         this.losses--;
     }
 
+    /**
+     * Getter for the win loss ratio of the node.
+     * 
+     * @return double
+     */
     public double getWinLossRate() {
         return visits == 0 ? 0 : (double) this.wins / (double) this.visits;
 
     }
 
+    /**
+     * Gets a random child of the node.
+     * 
+     * @return Node
+     */
     public Node getRandomChild() {
         Random rand = new Random();
         int index = rand.nextInt(this.children.size());
         return this.children.get(index);
     }
 
+    /**
+     * Gets the child of the node with the highest win loss ratio.
+     * 
+     * @return Node
+     */
     public Node getBestChild() {
         return this.children.stream()
-            .max((n1, n2) -> Double.compare(n1.getWinLossRate(), n2.getWinLossRate()))
-            .get();
+                .max((n1, n2) -> Double.compare(n1.getWinLossRate(), n2.getWinLossRate()))
+                .get();
     }
 
+    /**
+     * Gets the string representation of the node's move
+     * 
+     * @return String
+     */
     private String moveString() {
         return state == null ? "Undefined"
                 : Arrays.toString(this.state.getMove());
     }
 
+    /**
+     * Gets a random child of the node.
+     * 
+     * @param items the items to choose from
+     * @return T
+     */
     private static <T> T getRandomListElement(List<T> items) {
         return items.get(new Random().nextInt(items.size()));
     }
 
+    /**
+     * Getter for the move of the node's state.
+     * 
+     * @return int[]
+     */
     private int[] getMove() {
         return this.state.getMove();
     }
 
+    // Methods for monte carlo tree search
+
+    /**
+     * Selects a random node from the tree.
+     * 
+     * @return Node
+     */
     public Node select() {
         Node currentNode = this;
         List<int[]> moves = currentNode.children
@@ -188,6 +348,11 @@ public class Node {
         return getRandomListElement(expandableChildNodes);
     }
 
+    /**
+     * Expands the node.
+     * 
+     * @return Node
+     */
     public void expand() {
         List<int[]> moves = state.getMoves();
 
@@ -271,6 +436,11 @@ public class Node {
 
     }
 
+    /**
+     * String representation of the node.
+     * 
+     * @return String
+     */
     @Override
     public String toString() {
         return new StringBuilder()
@@ -304,11 +474,22 @@ public class Node {
                 .toString();
     }
 
+    /**
+     * Equals method for the node.
+     * 
+     * @param obj
+     * @return boolean
+     */
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Node && this.state.equals(((Node) obj).state);
     }
 
+    /**
+     * Main method for testing.
+     * 
+     * @param args
+     */
     public static void main(String[] args) {
         Node root = new Node(null, new Board(), 1, 3, 3);
         Node selected = root.select();
