@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
  * @author emsquellen
  */
 public class Node {
+
     private final Node parent;
     private final State state;
     private boolean isTerminal;
@@ -17,48 +18,6 @@ public class Node {
     private int visits;
     private int wins;
     private int losses;
-
-    /**
-     * Represents a Outcome of a playout
-     *
-     * @author emsquellen
-     */
-    private class Outcome {
-        private final Node terminalNode;
-        private final OutcomeType type;
-
-        /**
-         * Type of outcome
-         */
-        enum OutcomeType {
-            WIN, LOSS, DRAW, UNKNOWN
-        }
-
-        /**
-         * Constructor for an outcome.
-         *
-         * @param terminalNode the terminal node
-         * @param type         the outcome type
-         */
-        Outcome(OutcomeType type, Node terminalNode) {
-            this.terminalNode = terminalNode;
-            this.type = type;
-        }
-
-        /**
-         * Getter for the type of outcome.
-         */
-        OutcomeType getType() {
-            return type;
-        }
-
-        /**
-         * Getter for the terminal node.
-         */
-        Node getTerminalNode() {
-            return terminalNode;
-        }
-    }
 
     /**
      * Constructor for a node.
@@ -312,7 +271,9 @@ public class Node {
      */
     public Node getRandomChild() {
         Random rand = new Random();
+        // Get a random number between 0 and the number of children
         int index = rand.nextInt(this.children.size());
+        // Return the child at that index
         return this.children.get(index);
     }
 
@@ -322,6 +283,7 @@ public class Node {
      * @return Node
      */
     public Node getBestChild() {
+        // Get the child with the highest win loss ratio
         return this.children.stream()
                 .max((n1, n2) -> Double.compare(n1.getWinLossRate(), n2.getWinLossRate()))
                 .get();
@@ -333,6 +295,7 @@ public class Node {
      * @return String
      */
     private String moveString() {
+        // Get the move of the node if it has one, else return "Undefined"
         return state == null ? "Undefined"
                 : Arrays.toString(this.state.getMove());
     }
@@ -365,19 +328,24 @@ public class Node {
      */
     public Node select() {
         Node currentNode = this;
+        // Get all moves from the children of the node using a stream
         List<int[]> moves = currentNode.children
                 .stream()
                 .map(Node::getMove)
                 .collect(Collectors.toList());
         List<Node> expandableChildNodes = new ArrayList<Node>();
 
+        // For each move of the childeren of the node
         currentNode.state.getMoves().forEach(possibleMove -> {
+            // If the move is not in the list of moves
             if (!moves.contains(possibleMove)) {
+                // Add the node to the list of expandable nodes
                 expandableChildNodes.add(currentNode);
             }
         });
-
-        return getRandomListElement(expandableChildNodes);
+        // If there are expandable nodes, get a random node from the list.
+        // Else, return null
+        return expandableChildNodes.size() > 0 ? getRandomListElement(expandableChildNodes) : null;
     }
 
     /**
@@ -388,16 +356,23 @@ public class Node {
     public void expand() {
         List<int[]> moves = state.getMoves();
 
+        // For each possible legal move
         for (int i = 0; i < moves.size(); i++) {
+            // Get the move
             int[] move = moves.get(i);
+            // Clone the current board
             Board newBoard = new Board(state.getBoard());
+            // Make the move on the board
             newBoard.makeMove(move[0], move[1], state.getPlayer());
 
+            // Create a new node with the new board for the opponent
             Node child = new Node(
                     this, newBoard, state.getOpponent(), move[0], move[1]);
+            // Skip the node if it is already in the children of the node
             if (this.children.contains(child)) {
                 continue;
             }
+            // Add the node to the children of the node
             this.addChild(child);
         }
     }
@@ -407,49 +382,64 @@ public class Node {
      * Using random moves.
      */
     public Outcome playout() {
+        // Get a random node from the children of the node
         Node currentNode = getRandomChild();
         int newNodePlayer = currentNode.state.getOpponent();
-        List<Node> visited = new ArrayList<Node>();
 
-        visited.add(currentNode);
-
+        // While the game is not over
         while (!currentNode.state.getBoard().gameOver()) {
-            // Select a random child node
+            // Get all legal moves from the current node
             List<int[]> moves = currentNode.state
                     .getBoard()
                     .getAllMoves(newNodePlayer);
+            // Clone the board
             Board newBoard = new Board(currentNode.state.getBoard());
             int[] move;
             Node childNode;
-            // If there are no moves, then player is skipped
+            // If there are moves
             if (moves.size() > 0) {
+                // Get a random move
                 move = getRandomListElement(moves);
+                // Make the move on the board
                 newBoard.makeMove(move[0], move[1], newNodePlayer);
+                // Create a new node with the new board for the opponent
                 childNode = new Node(
                         currentNode, newBoard, newNodePlayer, move[0], move[1]);
+                // Skip the node if it is already in the children of the node
                 if (this.children.contains(childNode)) {
                     continue;
                 }
+                // Add the node to the children of the node
                 currentNode.addChild(childNode);
-                visited.add(childNode);
+                // Set the current node to the new node
                 currentNode = childNode;
+                // Set the new node player to the opponent of the new node
                 newNodePlayer = currentNode.state.getOpponent();
             } else {
+                // If there are no moves, skip the node
                 newNodePlayer = currentNode.state.getPlayer();
             }
         }
 
+        // Return the outcome of the game
+
+        // Retrieve the scores of the game
         int myScore = currentNode.state.getBoard()
                 .getScore(this.state.getPlayer());
         int oppScore = currentNode.state.getBoard()
                 .getScore(this.state.getOpponent());
+
         if (myScore > oppScore) {
+            // If the player won
             return new Outcome(Outcome.OutcomeType.WIN, currentNode);
         } else if (myScore < oppScore) {
+            // If the player lost
             return new Outcome(Outcome.OutcomeType.LOSS, currentNode);
         } else if (myScore == oppScore) {
+            // If the game was a draw
             return new Outcome(Outcome.OutcomeType.DRAW, currentNode);
         } else {
+            // If the game is invalid
             return new Outcome(Outcome.OutcomeType.UNKNOWN, currentNode);
         }
     }
@@ -460,14 +450,27 @@ public class Node {
      * @param outcome the outcome of the playout
      */
     public void backpropagate(Outcome outcome) {
+        // Retrieve the terminal node of the outcome
         Node currentNode = outcome.getTerminalNode();
+        // If the outcome is a draw or unknown, skip the node
+        if (currentNode == null || outcome.getType() == Outcome.OutcomeType.UNKNOWN
+                || outcome.getType() == Outcome.OutcomeType.DRAW) {
+            return;
+        }
+        // While the current node is not the root node
         while (currentNode != null) {
+            // Update the visit count of the node
             currentNode.incrementVisits();
+            // If the outcome is a win
             if (outcome.getType() == Outcome.OutcomeType.WIN) {
+                // Update the win count of the node
                 currentNode.incrementWins();
+                // If the outcome is a loss
             } else if (outcome.getType() == Outcome.OutcomeType.LOSS) {
+                // Update the loss count of the node
                 currentNode.incrementLosses();
             }
+            // Set the current node to the parent of the current node
             currentNode = currentNode.parent;
         }
     }
@@ -519,18 +522,5 @@ public class Node {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Node && this.state.equals(((Node) obj).state);
-    }
-
-    /**
-     * Main method for testing.
-     * 
-     * @param args
-     */
-    public static void main(String[] args) {
-        Node root = new Node(null, new Board(), 1, 3, 3);
-        Node selected = root.select();
-        selected.expand();
-        Outcome o = selected.playout();
-        selected.backpropagate(o);
     }
 }
