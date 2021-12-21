@@ -28,14 +28,14 @@ public class Outcome {
     /**
      * Getter for the type of outcome.
      */
-    OutcomeType getType() {
+    public OutcomeType getType() {
         return type;
     }
 
     /**
      * Getter for the terminal node.
      */
-    Node getTerminalNode() {
+    public Node getTerminalNode() {
         return terminalNode;
     }
 }
