@@ -19,13 +19,45 @@ public class Node {
     private int losses;
 
     /**
-     * Enum for the possible ending of a node
+     * Represents a Outcome of a playout
+     *
+     * @author emsquellen
      */
-    enum Outcome {
-        WIN,
-        DRAW,
-        LOSE,
-        ERROR
+    private class Outcome {
+        private final Node terminalNode;
+        private final OutcomeType type;
+
+        /**
+         * Type of outcome
+         */
+        enum OutcomeType {
+            WIN, LOSS, DRAW, UNKNOWN
+        }
+
+        /**
+         * Constructor for an outcome.
+         *
+         * @param terminalNode the terminal node
+         * @param type         the outcome type
+         */
+        Outcome(OutcomeType type, Node terminalNode) {
+            this.terminalNode = terminalNode;
+            this.type = type;
+        }
+
+        /**
+         * Getter for the type of outcome.
+         */
+        OutcomeType getType() {
+            return type;
+        }
+
+        /**
+         * Getter for the terminal node.
+         */
+        Node getTerminalNode() {
+            return terminalNode;
+        }
     }
 
     /**
@@ -374,7 +406,7 @@ public class Node {
      * Simulates a random game from this node.
      * Using random moves.
      */
-    public void playout() {
+    public Outcome playout() {
         Node currentNode = getRandomChild();
         int newNodePlayer = currentNode.state.getOpponent();
         List<Node> visited = new ArrayList<Node>();
@@ -407,33 +439,37 @@ public class Node {
             }
         }
 
-        // "Playout" is complete, so update the visit count and win/loss
-        // counts for the nodes visited during the playout.
-        // Replaces the function of the "backpropagate" function.
-
         int myScore = currentNode.state.getBoard()
                 .getScore(this.state.getPlayer());
         int oppScore = currentNode.state.getBoard()
                 .getScore(this.state.getOpponent());
-        Outcome outcome;
         if (myScore > oppScore) {
-            outcome = Outcome.WIN;
+            return new Outcome(Outcome.OutcomeType.WIN, currentNode);
         } else if (myScore < oppScore) {
-            outcome = Outcome.LOSE;
+            return new Outcome(Outcome.OutcomeType.LOSS, currentNode);
         } else if (myScore == oppScore) {
-            outcome = Outcome.DRAW;
+            return new Outcome(Outcome.OutcomeType.DRAW, currentNode);
         } else {
-            outcome = Outcome.ERROR;
+            return new Outcome(Outcome.OutcomeType.UNKNOWN, currentNode);
         }
-        for (Node node : visited) {
-            if (outcome == Outcome.WIN) {
-                node.incrementWins();
-            } else if (outcome == Outcome.LOSE) {
-                node.incrementLosses();
-            }
-            node.incrementVisits();
-        }
+    }
 
+    /**
+     * Backpropagates the result of a playout.
+     * 
+     * @param outcome the outcome of the playout
+     */
+    public void backpropagate(Outcome outcome) {
+        Node currentNode = outcome.getTerminalNode();
+        while (currentNode != null) {
+            currentNode.incrementVisits();
+            if (outcome.getType() == Outcome.OutcomeType.WIN) {
+                currentNode.incrementWins();
+            } else if (outcome.getType() == Outcome.OutcomeType.LOSS) {
+                currentNode.incrementLosses();
+            }
+            currentNode = currentNode.parent;
+        }
     }
 
     /**
@@ -494,12 +530,7 @@ public class Node {
         Node root = new Node(null, new Board(), 1, 3, 3);
         Node selected = root.select();
         selected.expand();
-        selected.playout();
-        selected.playout();
-        selected.playout();
-        System.out.println(selected.toString());
-        root.getChildren().forEach(child -> {
-            System.out.println(child.toString());
-        });
+        Outcome o = selected.playout();
+        selected.backpropagate(o);
     }
 }
