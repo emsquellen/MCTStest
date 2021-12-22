@@ -158,6 +158,18 @@ public class Node {
         return this.children.size();
     }
 
+    public Node addOpponentNode(int x, int y) {
+        Board newBoard = new Board(this.state.getBoard());
+        newBoard.makeMove(x, y, this.state.getOpponent());
+        Node opponentNode = new Node(this, newBoard, this.state.getOpponent(), x, y);
+        if (this.children.contains(opponentNode)) {
+            return this.children.get(this.children.indexOf(opponentNode));
+        } else {
+            this.addChild(opponentNode);
+            return opponentNode;
+        }
+    }
+
     /**
      * Getter for the visits of the node.
      * 
@@ -405,12 +417,6 @@ public class Node {
                 // Create a new node with the new board for the opponent
                 childNode = new Node(
                         currentNode, newBoard, newNodePlayer, move[0], move[1]);
-                // Skip the node if it is already in the children of the node
-                if (this.children.contains(childNode)) {
-                    continue;
-                }
-                // Add the node to the children of the node
-                currentNode.addChild(childNode);
                 // Set the current node to the new node
                 currentNode = childNode;
                 // Set the new node player to the opponent of the new node
@@ -482,6 +488,7 @@ public class Node {
      */
     @Override
     public String toString() {
+        // StringBuilder is better than string concatenation
         return new StringBuilder()
                 .append("Node ")
                 .append(moveString())

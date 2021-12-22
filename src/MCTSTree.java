@@ -30,7 +30,7 @@ public class MCTSTree {
     /**
      * monte carlo tree search
      */
-    public void monteCarlo() {
+    public void mcts() {
         Node selected = root.select();
         if (selected != null) {
             selected.expand();
@@ -40,49 +40,10 @@ public class MCTSTree {
     }
 
     /**
-     * gets the best move
+     * Gets the best move
      */
     public Node getBestMove() {
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
-        this.monteCarlo();
+        this.mcts();
         return root.getBestChild();
     }
 
@@ -90,5 +51,4 @@ public class MCTSTree {
         MCTSTree tree = new MCTSTree();
         System.out.println(tree.getBestMove().toString());
     }
-
 }

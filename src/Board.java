@@ -154,6 +154,11 @@ public class Board {
         return isFull() || noMoves();
     }
 
+    public void printBoard() {
+        System.out.println(this.toString());
+    }
+
+
     public static void main(String[] args) {
         Board b = new Board();
         System.out.println(b.toString());
