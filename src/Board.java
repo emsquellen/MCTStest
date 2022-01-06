@@ -31,61 +31,95 @@ public class Board {
         return obj instanceof Board && Arrays.deepEquals(this.gameBoard, ((Board) obj).gameBoard);
     }
 
-    public boolean makeMove(int x, int y, int player) {
-        if (!(0 <= x && x < 8 && 0 <= y && y < 8) && gameBoard[x][y] == 0) {
-            return false;
-        }
-        gameBoard[x][y] = player;
-        int opponent = player == 1 ? 2 : 1;
-        for (int i = -1; i <= 1; ++i) {
-            for (int j = -1; j <= 1; j++) {
-                if (i == 0 && j == 0) {
+    // public boolean makeMove(int x, int y, int player) {
+    // if (!(0 <= x && x < 8 && 0 <= y && y < 8) && gameBoard[x][y] == 0) {
+    // return false;
+    // }
+    // gameBoard[x][y] = player;
+    // int opponent = player == 1 ? 2 : 1;
+    // for (int i = -1; i <= 1; ++i) {
+    // for (int j = -1; j <= 1; j++) {
+    // if (i == 0 && j == 0) {
+    // continue;
+    // }
+    // int xpos = x + i;
+    // int ypos = y + j;
+    // if (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 && gameBoard[xpos][ypos]
+    // == opponent) {
+    // while (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 &&
+    // gameBoard[xpos][ypos] == opponent) {
+    // xpos += i;
+    // ypos += j;
+    // }
+    // if (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 && gameBoard[xpos][ypos]
+    // == player) {
+    // while (!(xpos == x && ypos == y)) {
+    // gameBoard[xpos][ypos] = player;
+    // xpos -= i;
+    // ypos -= j;
+    // }
+    // }
+    // }
+    // }
+    // }
+    // return true;
+    // }
+
+    public void makeMove(int x, int y, int intacter) {
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                if (i == 0 && j == 0)
+                    continue;
+
+                // Absolute positions on the board
+                int x_pos = x + i;
+                int y_pos = y + j;
+
+                // Check if surrounding position is out of bounds
+                if (x_pos == -1 || x_pos == this.gameBoard[0].length || y_pos == -1 || y_pos == this.gameBoard.length) {
                     continue;
                 }
-                int xpos = x + i;
-                int ypos = y + j;
-                if (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 && gameBoard[xpos][ypos] == opponent) {
-                    while (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 && gameBoard[xpos][ypos] == opponent) {
-                        xpos += i;
-                        ypos += j;
-                    }
-                    if (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 && gameBoard[xpos][ypos] == player) {
-                        while (!(xpos == x && ypos == y)) {
-                            gameBoard[xpos][ypos] = player;
-                            xpos -= i;
-                            ypos -= j;
-                        }
-                    }
-                }
+
+                int positionValue = this.gameBoard[y_pos][x_pos];
+
+                if (positionValue == 0 || positionValue == intacter)
+                    continue;
+
+                updateDirection(i, j, x_pos, y_pos, intacter);
             }
         }
-        return true;
+        this.gameBoard[y][x] = intacter;
     }
 
-    public boolean checkMove(int x, int y, int player) {
-        if (!(0 <= x && x < 8 && 0 <= y && y < 8) && gameBoard[x][y] == 0) {
+    public boolean updateDirection(int x_incremental, int y_incremental, int x_pos, int y_pos, int intacter) {
+        int new_x_pos = x_pos + x_incremental;
+        int new_y_pos = y_pos + y_incremental;
+
+        // Out of bounds check
+        if ((new_x_pos < 0 || new_x_pos > this.gameBoard.length - 1)
+                || (new_y_pos < 0 || new_y_pos > this.gameBoard[0].length - 1)) {
             return false;
         }
-        int opponent = player == 1 ? 2 : 1;
-        for (int i = -1; i <= 1; ++i) {
-            for (int j = -1; j <= 1; j++) {
-                if (i == 0 && j == 0) {
-                    continue;
-                }
-                int xpos = x + i;
-                int ypos = y + j;
-                if (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 && gameBoard[xpos][ypos] == opponent) {
-                    while (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 && gameBoard[xpos][ypos] == opponent) {
-                        xpos += i;
-                        ypos += j;
-                    }
-                    if (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 && gameBoard[xpos][ypos] == player) {
-                        return true;
-                    }
-                }
-            }
+
+        int positionValue = this.gameBoard[new_y_pos][new_x_pos];
+
+        if (positionValue == intacter) {
+            this.gameBoard[y_pos][x_pos] = intacter;
+            return true;
         }
+
+        if (positionValue == 0) {
+            return false;
+        }
+
+        if (updateDirection(x_incremental, y_incremental, new_x_pos, new_y_pos, intacter)) {
+            this.gameBoard[y_pos][x_pos] = intacter;
+
+            return true;
+        }
+
         return false;
+
     }
 
     public int getScore(int player) {
@@ -141,6 +175,32 @@ public class Board {
         return moves;
     }
 
+    public boolean checkMove(int x, int y, int player) {
+        if (!(0 <= x && x < 8 && 0 <= y && y < 8) && gameBoard[x][y] == 0) {
+            return false;
+        }
+        int opponent = player == 1 ? 2 : 1;
+        for (int i = -1; i <= 1; ++i) {
+            for (int j = -1; j <= 1; j++) {
+                if (i == 0 && j == 0) {
+                    continue;
+                }
+                int xpos = x + i;
+                int ypos = y + j;
+                if (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 && gameBoard[xpos][ypos] == opponent) {
+                    while (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 && gameBoard[xpos][ypos] == opponent) {
+                        xpos += i;
+                        ypos += j;
+                    }
+                    if (0 <= xpos && xpos < 8 && 0 <= ypos && ypos < 8 && gameBoard[xpos][ypos] == player) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return Arrays.deepToString(gameBoard).replace("], ", "]\n") + "\n";
@@ -156,13 +216,5 @@ public class Board {
 
     public void printBoard() {
         System.out.println(this.toString());
-    }
-
-
-    public static void main(String[] args) {
-        Board b = new Board();
-        System.out.println(b.toString());
-        b.makeMove(3, 2, 1);
-        System.out.println(b.toString());
     }
 }

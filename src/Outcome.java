@@ -4,15 +4,14 @@
  * @author emsquellen
  */
 public class Outcome {
-    private final Node terminalNode;
-    private final OutcomeType type;
+    public static final byte WIN = -0x01;
+    public static final byte LOSS = -0x02;
+    public static final byte DRAW = -0x03;
+    public static final byte UNKNOWN = -0x04;
 
-    /**
-     * Type of outcome
-     */
-    enum OutcomeType {
-        WIN, LOSS, DRAW, UNKNOWN
-    }
+    private final Node terminalNode;
+    private final byte type;
+
 
     /**
      * Constructor for an outcome.
@@ -20,7 +19,7 @@ public class Outcome {
      * @param terminalNode the terminal node
      * @param type         the outcome type
      */
-    Outcome(OutcomeType type, Node terminalNode) {
+    Outcome(byte type, Node terminalNode) {
         this.terminalNode = terminalNode;
         this.type = type;
     }
@@ -28,7 +27,7 @@ public class Outcome {
     /**
      * Getter for the type of outcome.
      */
-    public OutcomeType getType() {
+    public byte getType() {
         return type;
     }
 

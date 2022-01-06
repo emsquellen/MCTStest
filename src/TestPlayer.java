@@ -16,8 +16,13 @@ public class TestPlayer {
     }
 
     public int[] getMove() {
+        if (tree.isGameEnded()) {
+            return null;
+        }
         tree.mcts();
-        return tree.getBestMove().getState().getMove();
+        Node bestMoveNode = tree.getBestMove();
+        int[] bestMove = bestMoveNode.getState().getMove();
+        return bestMove;
     }
 
     public void addOpponentMove(int[] move) {

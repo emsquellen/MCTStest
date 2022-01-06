@@ -437,16 +437,16 @@ public class Node {
 
         if (myScore > oppScore) {
             // If the player won
-            return new Outcome(Outcome.OutcomeType.WIN, currentNode);
+            return new Outcome(Outcome.WIN, currentNode);
         } else if (myScore < oppScore) {
             // If the player lost
-            return new Outcome(Outcome.OutcomeType.LOSS, currentNode);
+            return new Outcome(Outcome.LOSS, currentNode);
         } else if (myScore == oppScore) {
             // If the game was a draw
-            return new Outcome(Outcome.OutcomeType.DRAW, currentNode);
+            return new Outcome(Outcome.DRAW, currentNode);
         } else {
             // If the game is invalid
-            return new Outcome(Outcome.OutcomeType.UNKNOWN, currentNode);
+            return new Outcome(Outcome.UNKNOWN, currentNode);
         }
     }
 
@@ -459,8 +459,8 @@ public class Node {
         // Retrieve the terminal node of the outcome
         Node currentNode = outcome.getTerminalNode();
         // If the outcome is a draw or unknown, skip the node
-        if (currentNode == null || outcome.getType() == Outcome.OutcomeType.UNKNOWN
-                || outcome.getType() == Outcome.OutcomeType.DRAW) {
+        if (currentNode == null || outcome.getType() == Outcome.UNKNOWN
+                || outcome.getType() == Outcome.DRAW) {
             return;
         }
         // While the current node is not the root node
@@ -468,11 +468,11 @@ public class Node {
             // Update the visit count of the node
             currentNode.incrementVisits();
             // If the outcome is a win
-            if (outcome.getType() == Outcome.OutcomeType.WIN) {
+            if (outcome.getType() == Outcome.WIN) {
                 // Update the win count of the node
                 currentNode.incrementWins();
                 // If the outcome is a loss
-            } else if (outcome.getType() == Outcome.OutcomeType.LOSS) {
+            } else if (outcome.getType() == Outcome.LOSS) {
                 // Update the loss count of the node
                 currentNode.incrementLosses();
             }

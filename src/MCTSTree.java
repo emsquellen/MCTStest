@@ -5,6 +5,7 @@
  */
 public class MCTSTree {
     private Node root;
+    private boolean gameEnded;
 
     /**
      * Constructor for MCTS tree
@@ -28,6 +29,13 @@ public class MCTSTree {
     }
 
     /**
+     * Getter for game ended
+     */
+    public boolean isGameEnded() {
+        return gameEnded;
+    }
+
+    /**
      * monte carlo tree search
      */
     public void mcts() {
@@ -36,6 +44,8 @@ public class MCTSTree {
             selected.expand();
             Outcome outcome = selected.playout();
             selected.backpropagate(outcome);
+        } else {
+            gameEnded = true;
         }
     }
 
@@ -45,10 +55,5 @@ public class MCTSTree {
     public Node getBestMove() {
         this.mcts();
         return root.getBestChild();
-    }
-
-    public static void main(String[] args) {
-        MCTSTree tree = new MCTSTree();
-        System.out.println(tree.getBestMove().toString());
     }
 }
