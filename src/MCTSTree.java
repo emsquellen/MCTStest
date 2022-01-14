@@ -10,8 +10,8 @@ public class MCTSTree {
     /**
      * Constructor for MCTS tree
      */
-    public MCTSTree() {
-        this.root = new Node(null, new Board(), 1, 3, 3);
+    public MCTSTree(int p) {
+        this.root = new Node(null, new Board(), p, 3, 3);
     }
 
     /**
@@ -56,4 +56,5 @@ public class MCTSTree {
         this.mcts();
         return root.getBestChild();
     }
+
 }

@@ -162,12 +162,9 @@ public class Node {
         Board newBoard = new Board(this.state.getBoard());
         newBoard.makeMove(x, y, this.state.getOpponent());
         Node opponentNode = new Node(this, newBoard, this.state.getOpponent(), x, y);
-        if (this.children.contains(opponentNode)) {
-            return this.children.get(this.children.indexOf(opponentNode));
-        } else {
-            this.addChild(opponentNode);
-            return opponentNode;
-        }
+        this.addChild(opponentNode);
+        return opponentNode;
+
     }
 
     /**
@@ -339,16 +336,13 @@ public class Node {
      * @return Node
      */
     public Node select() {
-        Node currentNode = this;
         // Get all moves from the children of the node using a stream
-        List<int[]> moves = currentNode.children
-                .stream()
-                .map(Node::getMove)
-                .collect(Collectors.toList());
+        List<int[]> moves = state.getMoves();
         List<Node> expandableChildNodes = new ArrayList<Node>();
 
         // For each move of the childeren of the node
-        currentNode.state.getMoves().forEach(possibleMove -> {
+        Node currentNode = this;
+        this.state.getMoves().forEach(possibleMove -> {
             // If the move is not in the list of moves
             if (!moves.contains(possibleMove)) {
                 // Add the node to the list of expandable nodes
@@ -367,15 +361,15 @@ public class Node {
      */
     public void expand() {
         List<int[]> moves = state.getMoves();
-
         // For each possible legal move
         for (int i = 0; i < moves.size(); i++) {
             // Get the move
             int[] move = moves.get(i);
+
             // Clone the current board
             Board newBoard = new Board(state.getBoard());
             // Make the move on the board
-            newBoard.makeMove(move[0], move[1], state.getPlayer());
+            newBoard.makeMove(move[0], move[1], state.getOpponent());
 
             // Create a new node with the new board for the opponent
             Node child = new Node(
@@ -399,7 +393,7 @@ public class Node {
         int newNodePlayer = currentNode.state.getOpponent();
 
         // While the game is not over
-        while (!currentNode.state.getBoard().gameOver()) {
+        do {
             // Get all legal moves from the current node
             List<int[]> moves = currentNode.state
                     .getBoard()
@@ -425,28 +419,31 @@ public class Node {
                 // If there are no moves, skip the node
                 newNodePlayer = currentNode.state.getPlayer();
             }
-        }
 
-        // Return the outcome of the game
+        } while (!currentNode.state.getBoard().gameOver());
 
+        return playOutcome(currentNode);
+
+    }
+
+    private Outcome playOutcome(Node node) {
         // Retrieve the scores of the game
-        int myScore = currentNode.state.getBoard()
+        int myScore = node.state.getBoard()
                 .getScore(this.state.getPlayer());
-        int oppScore = currentNode.state.getBoard()
+        int oppScore = node.state.getBoard()
                 .getScore(this.state.getOpponent());
-
         if (myScore > oppScore) {
             // If the player won
-            return new Outcome(Outcome.WIN, currentNode);
+            return new Outcome(Outcome.WIN, node);
         } else if (myScore < oppScore) {
             // If the player lost
-            return new Outcome(Outcome.LOSS, currentNode);
+            return new Outcome(Outcome.LOSS, node);
         } else if (myScore == oppScore) {
             // If the game was a draw
-            return new Outcome(Outcome.DRAW, currentNode);
+            return new Outcome(Outcome.DRAW, node);
         } else {
             // If the game is invalid
-            return new Outcome(Outcome.UNKNOWN, currentNode);
+            return new Outcome(Outcome.UNKNOWN, node);
         }
     }
 

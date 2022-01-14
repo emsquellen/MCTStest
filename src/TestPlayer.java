@@ -4,14 +4,16 @@ public class TestPlayer {
 
     public TestPlayer(int player) {
         this.player = player;
-        this.tree = new MCTSTree();
+        this.tree = new MCTSTree(player);
     }
 
     public int getPlayer() {
+        
         return player;
     }
 
     public MCTSTree getTree() {
+        
         return tree;
     }
 

@@ -103,6 +103,6 @@ public class State {
      * Getter for the list of possible moves.
      */
     public List<int[]> getMoves() {
-        return this.board.getAllMoves(this.player);
+        return this.board.getAllMoves(this.opponent);
     }
 }
